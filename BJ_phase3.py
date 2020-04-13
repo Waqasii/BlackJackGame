@@ -19,7 +19,6 @@ import os  #it will used to restrat the game
 
 import numpy as np
 #import cv2
-
 global hitButton,standButton
 global total_chips
 global player_chips
@@ -352,7 +351,8 @@ def show_some(player,dealer):
                 #print(card)
                     
                 #OPENING,RESIZING AND LOADING IMAGE
-                load = Image.open(card.card_image)
+                #load = Image.open(card.card_image)
+                load = Image.open('Card-Back-01.png')
                 load = load.resize((width,height), Image.ANTIALIAS)
                 render = ImageTk.PhotoImage(load)
 
@@ -431,7 +431,43 @@ def show_another(player):
             img1.place(x=pxpos,y=pypos)
             pxpos+=width+30
         i+=1
-         
+               
+def show_all(dealer):
+    #if u want to show one hidden card of dealer then uncommit this below code
+    
+    global dCard
+    global dxpos,dypos
+    
+    dCard=0
+    dxpos=50
+    dypos=110
+
+
+    print('-----------------------------------')
+    print('Showing All Cards in Dealer Hand=',len(dealer.cards))
+    print("DEALER'S HAND: ")
+    i=0
+    for card in dealer.cards:
+        if(i==dCard):
+            dCard+=1        
+            #OPENING,RESIZING AND LOADING IMAGE
+            load = Image.open(card.card_image)
+            load = load.resize((width,height), Image.ANTIALIAS)
+            render = ImageTk.PhotoImage(load)
+
+            #DISPLAYING AND PLACING IMAGE ON SCREEN
+            img = Label(window,image=render)
+            img.image=render
+            img.place(x=dxpos,y=dypos)
+            dxpos+=width+30
+        i+=1
+            
+    
+    
+    
+        
+            
+                    
 def dshow_another(dealer):
     global dCard,dxpos,dypos
     print('In Show Another Function and dealer card already shown is=',dCard)
@@ -451,7 +487,8 @@ def dshow_another(dealer):
                     
             '''Player card position #3 '''
             #OPENING,RESIZING AND LOADING IMAGE
-            load1 = Image.open(card.card_image)
+            #load1 = Image.open(card.card_image)
+            load1 = Image.open('Card-Back-01.png')
             load1 = load1.resize((width,height), Image.ANTIALIAS)
             render = ImageTk.PhotoImage(load1)
 
@@ -479,13 +516,7 @@ def newGameButton(bt):
     global new_game_message
     enable(standButton)
     enable(hitButton)
-    
-    
-    #if(pCard!=0):
-        #os.system('python BlackJack_2nd_phase.py')
-        
-        
-        
+  
 
     if(bt=='new'):
         instructions.destroy()
@@ -590,9 +621,9 @@ def hitButtonFunc(bt):
     print('Total Cards In Dealer Hand:=',len(dealer_hand.cards))
     print('Total Cards In Player Hand:=',len(player_hand.cards))
     
+    print('Dealer Value:',dealer_hand.value)
+    print('Player VAlue:',player_hand.value)
     if(bt=='stand' and result==False):
-        
-       
         # Test different winning scenarios
         if dealer_hand.value > 21:      #21
             dealer_busts(player_hand,dealer_hand,player_chips)
@@ -607,6 +638,7 @@ def hitButtonFunc(bt):
         
     print('Checking if result is True or Not Final ')
     if (result==True): 
+        show_all(dealer_hand)
         disable(hitButton)
         disable(standButton)
         #this will show the hidden dealer card first
