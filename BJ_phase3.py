@@ -118,9 +118,6 @@ authorTitle.place(x=1121,y=100,anchor=W)
 dealerLabel = Label(window, text= "DEALER:", font=20,borderwidth=5,relief="groove")
 dealerLabel.place(x=50,y=50)
 
-#PLAYER LABEL
-dealerLabel = Label(window, text= "PLAYER:", font=20,borderwidth=5,relief="groove")
-dealerLabel.place(x=50,y=350)
 
 
 '''Used to identify the attributes of each card, and print out a string representation of each card'''
@@ -506,8 +503,26 @@ def disable(x):
 def enable(x):
     x.config(state=NORMAL)   
 
-    
-       
+def all_children (window) :
+    _list = window.winfo_children()
+
+    for item in _list :
+        if item.winfo_children() :
+            _list.extend(item.winfo_children())
+
+    return _list  
+
+def clearFrame():
+    widget_list = all_children(window)
+    print('Widget Lsit:',len(widget_list))
+    for item in widget_list:
+        
+        if(item.winfo_rootx()<900 and item.winfo_rooty()>=100 ):
+            print(item.winfo_rooty())
+            
+            item.destroy()
+      
+          
 #BUTTON FUNCTIONS
 def newGameButton(bt):
     global window
@@ -517,8 +532,10 @@ def newGameButton(bt):
     enable(standButton)
     enable(hitButton)
   
-
     if(bt=='new'):
+        if(pCard>0):
+            clearFrame()
+        
         instructions.destroy()
         new_game_message.destroy()
         dealerWinsLabel.destroy()
@@ -528,6 +545,11 @@ def newGameButton(bt):
         playerChipsLabel.destroy()
         playerChipsTotalLabel.destroy()
         chipsInput.delete(0,END)
+        
+        #PLAYER LABEL
+        playerLabel = Label(window, text= "PLAYER:", font=20,borderwidth=5,relief="groove")
+        playerLabel.place(x=50,y=350)
+        
         
         
         
@@ -771,17 +793,17 @@ playerChipsTotalLabel = Label(window, text=playerChipsTotal,font=15)
         
 #CHIPS LABEL    
 chipsLabel = Label(window, text="Chips:",bg="green", fg='white',font='Times 20')
-chipsLabel.place(x=640,y=500)
+chipsLabel.place(x=900,y=490)
 
 global chipData
 chipData = StringVar()
 #INPUT FIELD FOR CHIPS
 chipsInput = Entry(window, width=5,text=chipData, borderwidth=5, bg="lightgray")
-chipsInput.place(x=715,y=505)
+chipsInput.place(x=900,y=530)
         
 #CHIPS SUBMIT BUTTON
 chipsButton = Button(window,text="Submit Chips",command=submitChips,fg="white", bg="dark orange",borderwidth=5,font='Times 11')
-chipsButton.place(x=770, y=505)
+chipsButton.place(x=950, y=530)
 
         
   
