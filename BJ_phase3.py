@@ -19,6 +19,11 @@ import os  #it will used to restrat the game
 
 import numpy as np
 #import cv2
+#INPUT FIELD FOR CHIPS
+global chipsInput 
+global chipsButton,chipsLabel
+global bet_chips
+
 global hitButton,standButton
 global total_chips
 global player_chips
@@ -26,6 +31,7 @@ global player_hand
 global hitLabel
 global playing
 global new_game_message
+global dealerHitLabel,dhl_flag
 global dxpos,dypos
 global pxpos,pypos     # these are the x and y position variable of both dealer and player as d-pos and y-pos respectively
 #These two variable are created to controll the display of cards
@@ -267,28 +273,7 @@ def take_bet_question():
     chipsQuestion.place(x=640,y=450)
     
           
-def take_bet(chips):    
-    chips.bet= chipData.get()   #GRAB THE INPUT CHIP VALUE
 
-    if chips.bet.isdigit(): 
-        chips.bet = int(chips.bet)
-    if chips.bet > chips.total:
-        chipsError = Label(window, text="Chips are more than you have", font=20)
-        chipsError.pack()
-        
-    
-    return chips  
-    #try:
-                #chips.bet = int(input('How many chips would you like to bet? '))
-            #except ValueError:
-                #print('Sorry, a bet must be an integer!')
-            #else:
-                #if chips.bet > chips.total:
-                 #   print("Sorry, your bet can't exceed",chips.total)
-                #else:
-                 #   break              
-               
-            
 def hit(deck,hand):
         hand.add_card(deck.deal())
         hand.adjust_for_ace()
@@ -515,27 +500,40 @@ def all_children (window) :
 def clearFrame():
     widget_list = all_children(window)
     print('Widget Lsit:',len(widget_list))
-    for item in widget_list:
         
-        if(item.winfo_rootx()<900 and item.winfo_rooty()>=100 ):
-            print(item.winfo_rooty())
-            
+    for item in widget_list:
+        xp=item.winfo_rootx()
+        yp=item.winfo_rooty()
+       
+        
+        if(xp<900 and yp>=100  ):    
             item.destroy()
+        if(xp==58 and yp==51  ):    #it will destroy dealer hit label 
+            item.destroy()
+        
+        
+        
       
           
 #BUTTON FUNCTIONS
 def newGameButton(bt):
     global window
-    global pCard
+    global pCard,dCard,pxpos,pypos,dxpos,dypos
     global hitButton,standButton
     global new_game_message
+    global chipsInput,chipsButton,chipsLabel
     enable(standButton)
     enable(hitButton)
   
     if(bt=='new'):
         if(pCard>0):
             clearFrame()
-        
+            dCard=pCard=0
+            dxpos=50
+            dypos=110
+            pxpos=50
+            pypos=410
+            
         instructions.destroy()
         new_game_message.destroy()
         dealerWinsLabel.destroy()
@@ -544,11 +542,26 @@ def newGameButton(bt):
         playerBustLabel.destroy()
         playerChipsLabel.destroy()
         playerChipsTotalLabel.destroy()
+        
+        #CHIPS LABEL    
+        chipsLabel = Label(window, text="Chips:",bg="green", fg='white',font='Times 20')
+        chipsLabel.place(x=900,y=550)
+        
+        #INPUT FIELD FOR CHIPS
+        chipsInput = Entry(window, width=5,text=chipData, borderwidth=5, bg="lightgray")
+        chipsInput.place(x=900,y=600)
+                
+        #CHIPS SUBMIT BUTTON
+        chipsButton = Button(window,text="Submit Chips",command=submitChips,fg="white", bg="dark orange",borderwidth=5,font='Times 11')
+        chipsButton.place(x=950, y=600)
+            
         chipsInput.delete(0,END)
         
         #PLAYER LABEL
         playerLabel = Label(window, text= "PLAYER:", font=20,borderwidth=5,relief="groove")
         playerLabel.place(x=50,y=350)
+        
+        
         
         
         
@@ -585,11 +598,17 @@ def newGameButton(bt):
     
 
 def submitChips():
-    global playing
     
+    global playing,chipsInput,chipsButton,chipsLabel
+    global bet_chips
     #Set up the player's chips
     player_chips =Chips() #Default value of 100
     player_chips= take_bet(player_chips) 
+    bet_chips=player_chips
+    
+    chipsInput.destroy()
+    chipsButton.destroy()
+    chipsLabel.destroy()
     
     #Show cards(but keep one dealer card hidden)
     show_some(player_hand,dealer_hand) #SHOW THE DEALER'S HAND AND PLAYER'S HAND
@@ -600,13 +619,43 @@ def submitChips():
     #Paste rest of code here and see if we can simulate the rest of the gam eon the GUI
     hit_or_stand(deck,player_hand)  #Ask Player if they'd like to Hit or Stand
     
+    
+    
 #HAD TO RE-DEFINE THESE AGAIN HERE FOR DESTROY FUNCTION ON NEW GAME
 player_chips =Chips()        
 playerChipsTotal = player_chips.total
 
+
+def take_bet(chips):    
+    global bet_chips
+    bet_chips=chipData.get()
+    chips.bet= bet_chips  #GRAB THE INPUT CHIP VALUE
+
+    if chips.bet.isdigit(): 
+        chips.bet = int(chips.bet)
+    if chips.bet > chips.total:
+        chipsError = Label(window, text="Chips are more than you have", font=20)
+        chipsError.pack()
+        
+    
+    return chips  
+    #try:
+                #chips.bet = int(input('How many chips would you like to bet? '))
+            #except ValueError:
+                #print('Sorry, a bet must be an integer!')
+            #else:
+                #if chips.bet > chips.total:
+                 #   print("Sorry, your bet can't exceed",chips.total)
+                #else:
+                 #   break              
+               
+            
+            
 def hitButtonFunc(bt):
-
-
+    global bet_chips
+    global dhl_flag
+    dhl_flag=False
+    
     global hitButton,standButton
     result=False
     
@@ -614,8 +663,8 @@ def hitButtonFunc(bt):
     if(bt=='hit'):
        hand = Hand()
        
-          
-    player_chips = take_bet(Chips())
+       
+    player_chips = bet_chips
     
     
     hitLabel.destroy()
@@ -636,8 +685,14 @@ def hitButtonFunc(bt):
             print('Dealer get a new Card')
             hit(deck,dealer_hand)
             dshow_another(dealer_hand)   ##this function will print new inserted card
-            dealerHitLabel = Label(window, text="Dealer chooses to Hit",font=15,fg='white',bg='green')
+            dealerHitLabel = Label(window, text="Dealer chooses to Hit",font=15,fg='white',bg='green')    
             dealerHitLabel.place(x=50,y=20)
+            # window.update()
+            # print('Xpositon of Dealerhit label',dealerHitLabel.winfo_rootx())
+            # print('ypositon of Dealerhit label',dealerHitLabel.winfo_rooty())
+            
+           
+            
             
     # Show all cards
     print('Total Cards In Dealer Hand:=',len(dealer_hand.cards))
@@ -657,9 +712,9 @@ def hitButtonFunc(bt):
             push(player_hand,dealer_hand)
         result=True
         
-        
     print('Checking if result is True or Not Final ')
     if (result==True): 
+        
         show_all(dealer_hand)
         disable(hitButton)
         disable(standButton)
@@ -679,11 +734,11 @@ def hitButtonFunc(bt):
         global playerChipsLabel
         playerChipsTotal = player_chips.total
         playerChipsLabel = Label(window, text="Player's winnings stand at:",font=15,borderwidth=5,relief="groove")
-        playerChipsLabel.place(x=650,y=540)
+        playerChipsLabel.place(x=790,y=400)
         
         global playerChipsTotalLabel
         playerChipsTotalLabel = Label(window, text=playerChipsTotal,font=15,borderwidth=5,relief="groove")
-        playerChipsTotalLabel.place(x=900,y=540)
+        playerChipsTotalLabel.place(x=1010,y=400)
         
         print("\nPlayer's winnings stand at",player_chips.total)
         
@@ -791,19 +846,17 @@ playerChipsTotalLabel = Label(window, text=playerChipsTotal,font=15)
 
 
         
-#CHIPS LABEL    
-chipsLabel = Label(window, text="Chips:",bg="green", fg='white',font='Times 20')
-chipsLabel.place(x=900,y=490)
+
 
 global chipData
 chipData = StringVar()
-#INPUT FIELD FOR CHIPS
-chipsInput = Entry(window, width=5,text=chipData, borderwidth=5, bg="lightgray")
-chipsInput.place(x=900,y=530)
+# #INPUT FIELD FOR CHIPS
+# chipsInput = Entry(window, width=5,text=chipData, borderwidth=5, bg="lightgray")
+# chipsInput.place(x=900,y=600)
         
-#CHIPS SUBMIT BUTTON
-chipsButton = Button(window,text="Submit Chips",command=submitChips,fg="white", bg="dark orange",borderwidth=5,font='Times 11')
-chipsButton.place(x=950, y=530)
+# #CHIPS SUBMIT BUTTON
+# chipsButton = Button(window,text="Submit Chips",command=submitChips,fg="white", bg="dark orange",borderwidth=5,font='Times 11')
+# chipsButton.place(x=950, y=600)
 
         
   
