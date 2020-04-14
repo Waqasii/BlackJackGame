@@ -16,7 +16,7 @@ from PIL import ImageTk,Image
 from collections import OrderedDict
 from functools import partial
 import os  #it will used to restrat the game
-
+from tkinter import messagebox
 import numpy as np
 #import cv2
 #INPUT FIELD FOR CHIPS
@@ -545,15 +545,15 @@ def newGameButton(bt):
         
         #CHIPS LABEL    
         chipsLabel = Label(window, text="Chips:",bg="green", fg='white',font='Times 20')
-        chipsLabel.place(x=900,y=550)
+        chipsLabel.place(x=640,y=500)
         
         #INPUT FIELD FOR CHIPS
         chipsInput = Entry(window, width=5,text=chipData, borderwidth=5, bg="lightgray")
-        chipsInput.place(x=900,y=600)
+        chipsInput.place(x=717,y=505)
                 
         #CHIPS SUBMIT BUTTON
         chipsButton = Button(window,text="Submit Chips",command=submitChips,fg="white", bg="dark orange",borderwidth=5,font='Times 11')
-        chipsButton.place(x=950, y=600)
+        chipsButton.place(x=770, y=505)
             
         chipsInput.delete(0,END)
         
@@ -599,26 +599,35 @@ def newGameButton(bt):
 
 def submitChips():
     
-    global playing,chipsInput,chipsButton,chipsLabel
+    global playing,chipsInput,chipsButton,chipsLabel,chipsQuestion
     global bet_chips
     #Set up the player's chips
     player_chips =Chips() #Default value of 100
     player_chips= take_bet(player_chips) 
-    bet_chips=player_chips
-    
-    chipsInput.destroy()
-    chipsButton.destroy()
-    chipsLabel.destroy()
-    
-    #Show cards(but keep one dealer card hidden)
-    show_some(player_hand,dealer_hand) #SHOW THE DEALER'S HAND AND PLAYER'S HAND
-        
-    #Remove chips question from screen
     chipsQuestion.destroy()
-            
-    #Paste rest of code here and see if we can simulate the rest of the gam eon the GUI
-    hit_or_stand(deck,player_hand)  #Ask Player if they'd like to Hit or Stand
     
+    if(player_chips.bet<0):
+        messagebox.showerror("Error", "Chips are more than you have or Invalid!\nPlease Enter Valid Bet!!")
+        chipsInput.destroy()
+        chipsButton.destroy()
+        chipsLabel.destroy()
+        newGameButton('new')
+    else:
+        bet_chips=player_chips
+
+        chipsInput.destroy()
+        chipsButton.destroy()
+        chipsLabel.destroy()
+
+        #Show cards(but keep one dealer card hidden)
+        show_some(player_hand,dealer_hand) #SHOW THE DEALER'S HAND AND PLAYER'S HAND
+            
+        #Remove chips question from screen
+        chipsQuestion.destroy()
+                
+        #Paste rest of code here and see if we can simulate the rest of the gam eon the GUI
+        hit_or_stand(deck,player_hand)  #Ask Player if they'd like to Hit or Stand
+
     
     
 #HAD TO RE-DEFINE THESE AGAIN HERE FOR DESTROY FUNCTION ON NEW GAME
@@ -634,8 +643,9 @@ def take_bet(chips):
     if chips.bet.isdigit(): 
         chips.bet = int(chips.bet)
     if chips.bet > chips.total:
-        chipsError = Label(window, text="Chips are more than you have", font=20)
-        chipsError.pack()
+        # chipsError = Label(window, text="Chips are more than you have", font=20)
+        # chipsError.pack()
+        chips.bet=-1
         
     
     return chips  
@@ -734,11 +744,11 @@ def hitButtonFunc(bt):
         global playerChipsLabel
         playerChipsTotal = player_chips.total
         playerChipsLabel = Label(window, text="Player's winnings stand at:",font=15,borderwidth=5,relief="groove")
-        playerChipsLabel.place(x=790,y=400)
+        playerChipsLabel.place(x=650,y=540)
         
         global playerChipsTotalLabel
         playerChipsTotalLabel = Label(window, text=playerChipsTotal,font=15,borderwidth=5,relief="groove")
-        playerChipsTotalLabel.place(x=1010,y=400)
+        playerChipsTotalLabel.place(x=900,y=540)
         
         print("\nPlayer's winnings stand at",player_chips.total)
         
