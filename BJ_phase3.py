@@ -333,8 +333,11 @@ def show_some(player,dealer):
                 #print(card)
                     
                 #OPENING,RESIZING AND LOADING IMAGE
-                #load = Image.open(card.card_image)
-                load = Image.open('Card-Back-01.png')
+                if (i==1):
+                    load = Image.open(card.card_image)
+                else:
+                    load = Image.open('Card-Back-01.png')
+                
                 load = load.resize((width,height), Image.ANTIALIAS)
                 render = ImageTk.PhotoImage(load)
 
@@ -606,7 +609,7 @@ def submitChips():
     player_chips= take_bet(player_chips) 
     chipsQuestion.destroy()
     
-    if(player_chips.bet<0):
+    if(player_chips.bet<=0):
         messagebox.showerror("Error", "Chips are more than you have or Invalid!\nPlease Enter Valid Bet!!")
         chipsInput.destroy()
         chipsButton.destroy()
